@@ -131,6 +131,15 @@ const Index = () => {
                 </div>
               </div>
 
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hidden sm:flex"
+                onClick={() => navigate('/profile')}
+              >
+                <Icon name="User" size={20} />
+              </Button>
+
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="hidden sm:flex">
