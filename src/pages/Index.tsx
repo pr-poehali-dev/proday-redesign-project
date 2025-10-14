@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 
 const categories = [
@@ -17,13 +21,15 @@ const categories = [
   { id: 'hobby', name: 'Хобби', icon: 'Heart' },
 ];
 
+const cities = ['Все города', 'Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск'];
+
 const listings = [
-  { id: 1, title: 'Toyota Camry 2020', price: '2 500 000', category: 'transport', location: 'Москва', image: '/placeholder.svg' },
-  { id: 2, title: '2-комнатная квартира', price: '8 500 000', category: 'realty', location: 'Санкт-Петербург', image: '/placeholder.svg' },
-  { id: 3, title: 'Менеджер по продажам', price: '80 000', category: 'jobs', location: 'Казань', image: '/placeholder.svg' },
-  { id: 4, title: 'iPhone 14 Pro', price: '85 000', category: 'electronics', location: 'Москва', image: '/placeholder.svg' },
-  { id: 5, title: 'Ремонт квартир', price: 'Договорная', category: 'services', location: 'Екатеринбург', image: '/placeholder.svg' },
-  { id: 6, title: 'Диван угловой', price: '25 000', category: 'goods', location: 'Новосибирск', image: '/placeholder.svg' },
+  { id: 1, title: 'Toyota Camry 2020', price: 2500000, category: 'transport', location: 'Москва', image: 'https://cdn.poehali.dev/projects/cf688e9f-c2ff-4376-8a35-970e2e2fa625/files/c792cedb-e7d7-4e4b-9ca8-896c29d90ff8.jpg' },
+  { id: 2, title: '2-комнатная квартира', price: 8500000, category: 'realty', location: 'Санкт-Петербург', image: 'https://cdn.poehali.dev/projects/cf688e9f-c2ff-4376-8a35-970e2e2fa625/files/b450bbce-e6e7-4b18-ab4c-a8d6afae731c.jpg' },
+  { id: 3, title: 'Менеджер по продажам', price: 80000, category: 'jobs', location: 'Казань', image: '/placeholder.svg' },
+  { id: 4, title: 'iPhone 14 Pro', price: 85000, category: 'electronics', location: 'Москва', image: 'https://cdn.poehali.dev/projects/cf688e9f-c2ff-4376-8a35-970e2e2fa625/files/e3cd10ce-857e-4746-9b15-d0c001e78849.jpg' },
+  { id: 5, title: 'Ремонт квартир', price: 0, category: 'services', location: 'Екатеринбург', image: '/placeholder.svg' },
+  { id: 6, title: 'Диван угловой', price: 25000, category: 'goods', location: 'Новосибирск', image: '/placeholder.svg' },
 ];
 
 const Sidebar = ({ activeCategory, setActiveCategory }: { activeCategory: string; setActiveCategory: (id: string) => void }) => (
@@ -54,11 +60,34 @@ const Sidebar = ({ activeCategory, setActiveCategory }: { activeCategory: string
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState('Все города');
+  const [priceFrom, setPriceFrom] = useState('');
+  const [priceTo, setPriceTo] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const filteredListings = listings.filter(listing => 
-    (activeCategory === 'all' || listing.category === activeCategory) &&
-    listing.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [newListing, setNewListing] = useState({
+    title: '',
+    price: '',
+    category: '',
+    location: '',
+    description: ''
+  });
+
+  const filteredListings = listings.filter(listing => {
+    const matchesCategory = activeCategory === 'all' || listing.category === activeCategory;
+    const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCity = selectedCity === 'Все города' || listing.location === selectedCity;
+    const matchesPriceFrom = !priceFrom || listing.price >= Number(priceFrom);
+    const matchesPriceTo = !priceTo || (listing.price > 0 && listing.price <= Number(priceTo));
+    
+    return matchesCategory && matchesSearch && matchesCity && matchesPriceFrom && matchesPriceTo;
+  });
+
+  const handleSubmitListing = () => {
+    setIsDialogOpen(false);
+    setNewListing({ title: '', price: '', category: '', location: '', description: '' });
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -94,10 +123,89 @@ const Index = () => {
                 </div>
               </div>
 
-              <Button className="hidden sm:flex">
-                <Icon name="Plus" size={18} className="mr-2" />
-                Разместить
-              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="hidden sm:flex">
+                    <Icon name="Plus" size={18} className="mr-2" />
+                    Разместить
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Разместить объявление</DialogTitle>
+                    <DialogDescription>
+                      Заполните информацию о вашем объявлении
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="title">Название</Label>
+                      <Input
+                        id="title"
+                        placeholder="Например: Toyota Camry 2020"
+                        value={newListing.title}
+                        onChange={(e) => setNewListing({...newListing, title: e.target.value})}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="category">Категория</Label>
+                      <Select value={newListing.category} onValueChange={(value) => setNewListing({...newListing, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите категорию" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.filter(c => c.id !== 'all').map(cat => (
+                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="price">Цена (₽)</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          placeholder="0"
+                          value={newListing.price}
+                          onChange={(e) => setNewListing({...newListing, price: e.target.value})}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="location">Город</Label>
+                        <Select value={newListing.location} onValueChange={(value) => setNewListing({...newListing, location: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Выберите город" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {cities.filter(c => c !== 'Все города').map(city => (
+                              <SelectItem key={city} value={city}>{city}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="description">Описание</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Расскажите подробнее о вашем предложении..."
+                        rows={4}
+                        value={newListing.description}
+                        onChange={(e) => setNewListing({...newListing, description: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Отмена
+                    </Button>
+                    <Button onClick={handleSubmitListing}>
+                      Опубликовать
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </header>
@@ -125,7 +233,7 @@ const Index = () => {
           </section>
 
           <section>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-start justify-between mb-6 gap-4">
               <div>
                 <h2 className="text-2xl font-bold">
                   {categories.find(c => c.id === activeCategory)?.name || 'Все объявления'}
@@ -134,7 +242,54 @@ const Index = () => {
                   Найдено {filteredListings.length} {filteredListings.length === 1 ? 'объявление' : 'объявлений'}
                 </p>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="shrink-0"
+              >
+                <Icon name="Filter" size={16} className="mr-2" />
+                Фильтры
+              </Button>
             </div>
+
+            {showFilters && (
+              <Card className="mb-6 p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Город</Label>
+                    <Select value={selectedCity} onValueChange={setSelectedCity}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map(city => (
+                          <SelectItem key={city} value={city}>{city}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Цена от (₽)</Label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={priceFrom}
+                      onChange={(e) => setPriceFrom(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Цена до (₽)</Label>
+                    <Input
+                      type="number"
+                      placeholder="∞"
+                      value={priceTo}
+                      onChange={(e) => setPriceTo(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </Card>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredListings.map((listing) => (
@@ -158,7 +313,7 @@ const Index = () => {
                     </CardDescription>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-primary">
-                        {listing.price} ₽
+                        {listing.price === 0 ? 'Договорная' : `${listing.price.toLocaleString()} ₽`}
                       </span>
                       <Badge variant="secondary">
                         {categories.find(c => c.id === listing.category)?.name}
