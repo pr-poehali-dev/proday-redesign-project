@@ -58,12 +58,21 @@ const favoriteListings = [
 const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('listings');
+  
+  const userName = localStorage.getItem('userName') || 'Пользователь';
+  
   const [profileData, setProfileData] = useState({
-    name: 'Александр Иванов',
+    name: userName,
     email: 'alex@example.com',
     phone: '+7 (999) 123-45-67',
     city: 'Москва'
   });
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userName');
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -143,6 +152,7 @@ const Profile = () => {
                   <Separator className="my-4" />
 
                   <button
+                    onClick={handleLogout}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left text-destructive hover:bg-destructive/10 transition-colors"
                   >
                     <Icon name="LogOut" size={20} />

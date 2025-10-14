@@ -135,7 +135,10 @@ const Index = () => {
                 variant="ghost" 
                 size="icon" 
                 className="hidden sm:flex"
-                onClick={() => navigate('/profile')}
+                onClick={() => {
+                  const isAuth = localStorage.getItem('isAuthenticated');
+                  navigate(isAuth ? '/profile' : '/auth');
+                }}
               >
                 <Icon name="User" size={20} />
               </Button>
