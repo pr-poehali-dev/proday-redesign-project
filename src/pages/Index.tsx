@@ -1,12 +1,182 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Icon from '@/components/ui/icon';
+
+const categories = [
+  { id: 'all', name: 'Все объявления', icon: 'Grid' },
+  { id: 'transport', name: 'Транспорт', icon: 'Car' },
+  { id: 'realty', name: 'Недвижимость', icon: 'Home' },
+  { id: 'jobs', name: 'Работа', icon: 'Briefcase' },
+  { id: 'services', name: 'Услуги', icon: 'Wrench' },
+  { id: 'electronics', name: 'Электроника', icon: 'Smartphone' },
+  { id: 'goods', name: 'Товары', icon: 'Package' },
+  { id: 'hobby', name: 'Хобби', icon: 'Heart' },
+];
+
+const listings = [
+  { id: 1, title: 'Toyota Camry 2020', price: '2 500 000', category: 'transport', location: 'Москва', image: '/placeholder.svg' },
+  { id: 2, title: '2-комнатная квартира', price: '8 500 000', category: 'realty', location: 'Санкт-Петербург', image: '/placeholder.svg' },
+  { id: 3, title: 'Менеджер по продажам', price: '80 000', category: 'jobs', location: 'Казань', image: '/placeholder.svg' },
+  { id: 4, title: 'iPhone 14 Pro', price: '85 000', category: 'electronics', location: 'Москва', image: '/placeholder.svg' },
+  { id: 5, title: 'Ремонт квартир', price: 'Договорная', category: 'services', location: 'Екатеринбург', image: '/placeholder.svg' },
+  { id: 6, title: 'Диван угловой', price: '25 000', category: 'goods', location: 'Новосибирск', image: '/placeholder.svg' },
+];
+
+const Sidebar = ({ activeCategory, setActiveCategory }: { activeCategory: string; setActiveCategory: (id: string) => void }) => (
+  <div className="h-full bg-sidebar border-r border-sidebar-border">
+    <div className="p-6 border-b border-sidebar-border">
+      <h1 className="text-2xl font-bold text-sidebar-primary">ПРОДАЙ СОСЕДУ</h1>
+      <p className="text-sm text-muted-foreground mt-1">Доска объявлений</p>
+    </div>
+    <nav className="p-4 space-y-1">
+      {categories.map((category) => (
+        <button
+          key={category.id}
+          onClick={() => setActiveCategory(category.id)}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+            activeCategory === category.id
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+          }`}
+        >
+          <Icon name={category.icon as any} size={20} />
+          <span>{category.name}</span>
+        </button>
+      ))}
+    </nav>
+  </div>
+);
 
 const Index = () => {
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredListings = listings.filter(listing => 
+    (activeCategory === 'all' || listing.category === activeCategory) &&
+    listing.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 color-black text-black">Добро пожаловать!</h1>
-        <p className="text-xl text-gray-600">тут будет отображаться ваш проект</p>
-      </div>
+    <div className="flex h-screen overflow-hidden">
+      <aside className="hidden lg:block w-64 shrink-0">
+        <Sidebar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+      </aside>
+
+      <main className="flex-1 overflow-y-auto">
+        <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-4">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="lg:hidden">
+                    <Icon name="Menu" size={20} />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-64">
+                  <Sidebar activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+                </SheetContent>
+              </Sheet>
+
+              <div className="flex-1 max-w-xl">
+                <div className="relative">
+                  <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Поиск объявлений..."
+                    className="pl-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <Button className="hidden sm:flex">
+                <Icon name="Plus" size={18} className="mr-2" />
+                Разместить
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        <div className="container mx-auto px-4 py-8">
+          <section className="mb-12">
+            <Card className="overflow-hidden border-2 border-primary/20">
+              <CardContent className="p-0">
+                <div className="relative aspect-video bg-gradient-to-br from-primary/10 via-primary/5 to-background">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <button className="group relative">
+                      <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/30 transition-all" />
+                      <div className="relative bg-primary hover:bg-primary/90 transition-colors rounded-full p-8">
+                        <Icon name="Play" size={48} className="text-primary-foreground fill-current" />
+                      </div>
+                    </button>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                    <h2 className="text-2xl font-bold text-white mb-2">Как разместить объявление</h2>
+                    <p className="text-white/90">Узнайте, как быстро и бесплатно разместить своё объявление</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">
+                  {categories.find(c => c.id === activeCategory)?.name || 'Все объявления'}
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Найдено {filteredListings.length} {filteredListings.length === 1 ? 'объявление' : 'объявлений'}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredListings.map((listing) => (
+                <Card key={listing.id} className="group hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="p-0">
+                    <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
+                      <img
+                        src={listing.image}
+                        alt={listing.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <CardTitle className="text-lg line-clamp-1">{listing.title}</CardTitle>
+                    </div>
+                    <CardDescription className="flex items-center gap-2 mb-3">
+                      <Icon name="MapPin" size={14} />
+                      {listing.location}
+                    </CardDescription>
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold text-primary">
+                        {listing.price} ₽
+                      </span>
+                      <Badge variant="secondary">
+                        {categories.find(c => c.id === listing.category)?.name}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0">
+                    <Button variant="outline" className="w-full">
+                      <Icon name="MessageCircle" size={16} className="mr-2" />
+                      Написать
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </section>
+        </div>
+      </main>
     </div>
   );
 };
