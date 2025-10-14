@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,11 +15,17 @@ const categories = [
   { id: 'all', name: 'Все объявления', icon: 'Grid' },
   { id: 'transport', name: 'Транспорт', icon: 'Car' },
   { id: 'realty', name: 'Недвижимость', icon: 'Home' },
-  { id: 'jobs', name: 'Работа', icon: 'Briefcase' },
+  { id: 'jobs', name: 'Работа и Резюме', icon: 'Briefcase' },
   { id: 'services', name: 'Услуги', icon: 'Wrench' },
   { id: 'electronics', name: 'Электроника', icon: 'Smartphone' },
-  { id: 'goods', name: 'Товары', icon: 'Package' },
-  { id: 'hobby', name: 'Хобби', icon: 'Heart' },
+  { id: 'goods', name: 'Товары', icon: 'ShoppingBag' },
+  { id: 'hobby', name: 'Хобби и отдых', icon: 'Heart' },
+  { id: 'animals', name: 'Животные', icon: 'Dog' },
+  { id: 'forHome', name: 'Для дома и дачи', icon: 'Sofa' },
+  { id: 'fashion', name: 'Одежда и обувь', icon: 'Shirt' },
+  { id: 'children', name: 'Детские товары', icon: 'Baby' },
+  { id: 'business', name: 'Бизнес и оборудование', icon: 'Building2' },
+  { id: 'dating', name: 'Знакомства', icon: 'Users' },
 ];
 
 const cities = ['Все города', 'Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск'];
@@ -58,6 +65,7 @@ const Sidebar = ({ activeCategory, setActiveCategory }: { activeCategory: string
 );
 
 const Index = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('Все города');
@@ -208,24 +216,43 @@ const Index = () => {
               </Dialog>
             </div>
           </div>
+          
+          <div className="lg:hidden border-b bg-background">
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-2 px-4 py-3 min-w-max">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm transition-colors shrink-0 ${
+                      activeCategory === category.id
+                        ? 'bg-primary text-primary-foreground font-medium'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }`}
+                  >
+                    <Icon name={category.icon as any} size={16} />
+                    <span>{category.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </header>
 
         <div className="container mx-auto px-4 py-8">
           <section className="mb-12">
             <Card className="overflow-hidden border-2 border-primary/20">
               <CardContent className="p-0">
-                <div className="relative aspect-video bg-gradient-to-br from-primary/10 via-primary/5 to-background">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <button className="group relative">
-                      <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/30 transition-all" />
-                      <div className="relative bg-primary hover:bg-primary/90 transition-colors rounded-full p-8">
-                        <Icon name="Play" size={48} className="text-primary-foreground fill-current" />
-                      </div>
-                    </button>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-6">
-                    <h2 className="text-2xl font-bold text-white mb-2">Как разместить объявление</h2>
-                    <p className="text-white/90">Узнайте, как быстро и бесплатно разместить своё объявление</p>
+                <div className="relative aspect-video bg-black">
+                  <iframe
+                    src="https://proday-sosedu.ru/"
+                    className="w-full h-full border-0"
+                    title="Навигация по сайту"
+                    loading="lazy"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pointer-events-none">
+                    <h2 className="text-2xl font-bold text-white mb-2">Оригинальный сайт ПРОДАЙ СОСЕДУ</h2>
+                    <p className="text-white/90">Попробуйте новый современный интерфейс</p>
                   </div>
                 </div>
               </CardContent>
@@ -293,7 +320,11 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredListings.map((listing) => (
-                <Card key={listing.id} className="group hover:shadow-lg transition-shadow cursor-pointer">
+                <Card 
+                  key={listing.id} 
+                  className="group hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/listing/${listing.id}`)}
+                >
                   <CardHeader className="p-0">
                     <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
                       <img
