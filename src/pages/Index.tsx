@@ -30,6 +30,17 @@ const categories = [
   { id: 'dating', name: 'Знакомства', icon: 'Users' },
 ];
 
+const regions = [
+  { id: 'all', name: 'Все регионы', cities: ['Все города', 'Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск', 'Нижний Новгород', 'Челябинск', 'Самара', 'Омск', 'Ростов-на-Дону', 'Уфа', 'Красноярск', 'Воронеж', 'Пермь', 'Волгоград'] },
+  { id: 'central', name: 'Центральный ФО', cities: ['Москва', 'Воронеж', 'Ярославль', 'Тула', 'Рязань', 'Владимир', 'Калуга', 'Иваново', 'Брянск', 'Тамбов'] },
+  { id: 'northwest', name: 'Северо-Западный ФО', cities: ['Санкт-Петербург', 'Архангельск', 'Мурманск', 'Вологда', 'Калининград', 'Петрозаводск', 'Псков', 'Великий Новгород'] },
+  { id: 'south', name: 'Южный ФО', cities: ['Ростов-на-Дону', 'Краснодар', 'Волгоград', 'Астрахань', 'Сочи', 'Севастополь', 'Симферополь'] },
+  { id: 'volga', name: 'Приволжский ФО', cities: ['Казань', 'Нижний Новгород', 'Самара', 'Уфа', 'Пермь', 'Саратов', 'Ижевск', 'Ульяновск', 'Оренбург', 'Пенза'] },
+  { id: 'ural', name: 'Уральский ФО', cities: ['Екатеринбург', 'Челябинск', 'Тюмень', 'Магнитогорск', 'Нижний Тагил', 'Курган'] },
+  { id: 'siberia', name: 'Сибирский ФО', cities: ['Новосибирск', 'Красноярск', 'Омск', 'Томск', 'Барнаул', 'Иркутск', 'Кемерово', 'Новокузнецк'] },
+  { id: 'fareast', name: 'Дальневосточный ФО', cities: ['Владивосток', 'Хабаровск', 'Благовещенск', 'Якутск', 'Южно-Сахалинск', 'Петропавловск-Камчатский'] },
+];
+
 const cities = ['Все города', 'Москва', 'Санкт-Петербург', 'Казань', 'Екатеринбург', 'Новосибирск'];
 
 const cityCoordinates: Record<string, [number, number]> = {
@@ -78,6 +89,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedCity, setSelectedCity] = useState('Все города');
   const [priceFrom, setPriceFrom] = useState('');
   const [priceTo, setPriceTo] = useState('');
@@ -85,6 +97,9 @@ const Index = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>('');
+
+  const currentRegion = regions.find(r => r.id === selectedRegion) || regions[0];
+  const availableCities = currentRegion.cities;
 
   const [newListing, setNewListing] = useState({
     title: '',
@@ -157,6 +172,17 @@ const Index = () => {
                 </div>
               </div>
 
+              <div className="hidden sm:flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <Icon name="Newspaper" size={16} className="mr-1" />
+                  Статьи
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Icon name="Store" size={16} className="mr-1" />
+                  Магазины
+                </Button>
+              </div>
+
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -171,8 +197,8 @@ const Index = () => {
 
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="hidden sm:flex">
-                    <Icon name="Plus" size={18} className="mr-2" />
+                  <Button size="sm" className="hidden sm:flex">
+                    <Icon name="Plus" size={16} className="mr-1.5" />
                     Разместить
                   </Button>
                 </DialogTrigger>
@@ -224,7 +250,7 @@ const Index = () => {
                             <SelectValue placeholder="Выберите город" />
                           </SelectTrigger>
                           <SelectContent>
-                            {cities.filter(c => c !== 'Все города').map(city => (
+                            {availableCities.filter(c => c !== 'Все города').map(city => (
                               <SelectItem key={city} value={city}>{city}</SelectItem>
                             ))}
                           </SelectContent>
@@ -382,7 +408,23 @@ const Index = () => {
 
             {showFilters && (
               <Card className="mb-6 p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label>Регион</Label>
+                    <Select value={selectedRegion} onValueChange={(value) => {
+                      setSelectedRegion(value);
+                      setSelectedCity('Все города');
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {regions.map(region => (
+                          <SelectItem key={region.id} value={region.id}>{region.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label>Город</Label>
                     <Select value={selectedCity} onValueChange={setSelectedCity}>
@@ -390,7 +432,7 @@ const Index = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {cities.map(city => (
+                        {availableCities.map(city => (
                           <SelectItem key={city} value={city}>{city}</SelectItem>
                         ))}
                       </SelectContent>
