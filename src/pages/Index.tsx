@@ -14,6 +14,7 @@ import MapView from '@/components/MapView';
 import VideoTutorial from '@/components/VideoTutorial';
 import AdSlider from '@/components/AdSlider';
 import Footer from '@/components/Footer';
+import VIPSection from '@/components/VIPSection';
 
 const categories = [
   { id: 'all', name: 'Все объявления', icon: 'Grid' },
@@ -406,6 +407,8 @@ const Index = () => {
           <section className="mb-8">
             <AdSlider />
           </section>
+
+          <VIPSection />
 
           <section>
             <div className="flex items-start justify-between mb-6 gap-4">
