@@ -110,3 +110,7 @@
     display: none;
   }
 }
+
+.leaflet-container {
+  z-index: 1;
+}
