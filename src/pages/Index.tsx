@@ -199,7 +199,13 @@ const Index = () => {
                 </SheetContent>
               </Sheet>
 
-              <div className="flex-1 max-w-xl">
+              <div className="lg:hidden flex-1 text-center">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Продай соседу
+                </h1>
+              </div>
+
+              <div className="hidden lg:block flex-1 max-w-xl">
                 <div className="relative">
                   <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   <Input

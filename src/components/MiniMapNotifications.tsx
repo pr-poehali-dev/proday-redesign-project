@@ -17,6 +17,14 @@ const MiniMapNotifications = () => {
   ]);
 
   const [showNewNotification, setShowNewNotification] = useState(false);
+  const [cityCounts, setCityCounts] = useState<Record<string, number>>({
+    'Москва': 1247,
+    'Санкт-Петербург': 892,
+    'Казань': 543,
+    'Екатеринбург': 421,
+    'Новосибирск': 367,
+    'Краснодар': 298,
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,6 +40,10 @@ const MiniMapNotifications = () => {
 
       setNotifications(prev => [newNotification, ...prev.slice(0, 4)]);
       setShowNewNotification(true);
+      setCityCounts(prev => ({
+        ...prev,
+        [newNotification.city]: (prev[newNotification.city] || 0) + 1
+      }));
       
       setTimeout(() => setShowNewNotification(false), 3000);
     }, 15000);
@@ -52,11 +64,20 @@ const MiniMapNotifications = () => {
     <Card className="h-full overflow-hidden border-2 border-primary/20">
       <CardContent className="p-0 h-full flex flex-col">
         <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-4 text-white">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-3">
             <Icon name="MapPin" size={20} />
             <h3 className="font-bold text-lg">Активность</h3>
           </div>
-          <p className="text-xs text-white/80">Новые объявления в реальном времени</p>
+          <p className="text-xs text-white/80 mb-3">Новые объявления в реальном времени</p>
+          
+          <div className="space-y-1">
+            {Object.entries(cityCounts).slice(0, 3).map(([city, count]) => (
+              <div key={city} className="flex items-center justify-between text-xs">
+                <span className="text-white/90">{city}</span>
+                <span className="bg-white/20 px-2 py-0.5 rounded-full font-semibold">{count}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto">
