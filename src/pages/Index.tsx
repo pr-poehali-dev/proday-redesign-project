@@ -14,6 +14,7 @@ import MapView from '@/components/MapView';
 import VideoTutorial from '@/components/VideoTutorial';
 import Footer from '@/components/Footer';
 import VIPSection from '@/components/VIPSection';
+import MiniMapNotifications from '@/components/MiniMapNotifications';
 
 const categories = [
   { id: 'all', name: 'Все объявления', icon: 'Grid' },
@@ -373,8 +374,13 @@ const Index = () => {
         </header>
 
         <div className="container mx-auto px-4 py-8">
-          <section className="mb-8">
-            <VideoTutorial />
+          <section className="mb-8 grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="lg:col-span-3">
+              <VideoTutorial />
+            </div>
+            <div className="lg:col-span-1">
+              <MiniMapNotifications />
+            </div>
           </section>
 
           <section className="mb-8">
