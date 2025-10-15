@@ -515,10 +515,14 @@ const Index = () => {
                       </Badge>
                     </div>
                   </CardContent>
-                  <CardFooter className="p-4 pt-0">
-                    <Button variant="outline" className="w-full">
+                  <CardFooter className="p-4 pt-0 flex gap-2">
+                    <Button variant="outline" className="flex-1">
                       <Icon name="MessageCircle" size={16} className="mr-2" />
                       Написать
+                    </Button>
+                    <Button variant="default" className="flex-1">
+                      <Icon name="Phone" size={16} className="mr-2" />
+                      Позвонить
                     </Button>
                   </CardFooter>
                 </Card>
