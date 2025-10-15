@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import MapView from '@/components/MapView';
+import VideoTutorial from '@/components/VideoTutorial';
 
 const categories = [
   { id: 'all', name: 'Все объявления', icon: 'Grid' },
@@ -85,22 +84,15 @@ const Index = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showMap, setShowMap] = useState(false);
-
-  useEffect(() => {
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    });
-  }, []);
+  const [imagePreview, setImagePreview] = useState<string>('');
 
   const [newListing, setNewListing] = useState({
     title: '',
     price: '',
     category: '',
     location: '',
-    description: ''
+    description: '',
+    image: ''
   });
 
   const filteredListings = listings.filter(listing => {
@@ -113,9 +105,22 @@ const Index = () => {
     return matchesCategory && matchesSearch && matchesCity && matchesPriceFrom && matchesPriceTo;
   });
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        setNewListing({...newListing, image: reader.result as string});
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmitListing = () => {
     setIsDialogOpen(false);
-    setNewListing({ title: '', price: '', category: '', location: '', description: '' });
+    setNewListing({ title: '', price: '', category: '', location: '', description: '', image: '' });
+    setImagePreview('');
   };
 
   return (
@@ -236,6 +241,36 @@ const Index = () => {
                         onChange={(e) => setNewListing({...newListing, description: e.target.value})}
                       />
                     </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="photo">Фото объявления</Label>
+                      <Input
+                        id="photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="cursor-pointer"
+                      />
+                      {imagePreview && (
+                        <div className="mt-2 relative">
+                          <img 
+                            src={imagePreview} 
+                            alt="Preview" 
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setImagePreview('');
+                              setNewListing({...newListing, image: ''});
+                            }}
+                          >
+                            <Icon name="X" size={16} />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
@@ -274,22 +309,7 @@ const Index = () => {
 
         <div className="container mx-auto px-4 py-8">
           <section className="mb-8">
-            <Card className="overflow-hidden border-2 border-primary/20">
-              <CardContent className="p-0">
-                <div className="relative aspect-video bg-black">
-                  <iframe
-                    src="https://proday-sosedu.ru/"
-                    className="w-full h-full border-0"
-                    title="Навигация по сайту"
-                    loading="lazy"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pointer-events-none">
-                    <h2 className="text-2xl font-bold text-white mb-2">Оригинальный сайт ПРОДАЙ СОСЕДУ</h2>
-                    <p className="text-white/90">Попробуйте новый современный интерфейс</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <VideoTutorial />
           </section>
 
           <section className="mb-8">
@@ -311,43 +331,7 @@ const Index = () => {
               {showMap && (
                 <CardContent className="p-0">
                   <div className="h-[500px] w-full">
-                    <MapContainer
-                      center={[55.7558, 37.6173]}
-                      zoom={5}
-                      className="h-full w-full"
-                    >
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                      {filteredListings.map((listing) => (
-                        <Marker
-                          key={listing.id}
-                          position={listing.coordinates}
-                        >
-                          <Popup>
-                            <div className="min-w-[200px]">
-                              <img
-                                src={listing.image}
-                                alt={listing.title}
-                                className="w-full h-32 object-cover rounded mb-2"
-                              />
-                              <h3 className="font-bold text-sm mb-1">{listing.title}</h3>
-                              <p className="text-primary font-semibold mb-2">
-                                {listing.price === 0 ? 'Договорная' : `${listing.price.toLocaleString()} ₽`}
-                              </p>
-                              <Button
-                                size="sm"
-                                className="w-full"
-                                onClick={() => navigate(`/listing/${listing.id}`)}
-                              >
-                                Подробнее
-                              </Button>
-                            </div>
-                          </Popup>
-                        </Marker>
-                      ))}
-                    </MapContainer>
+                    <MapView listings={filteredListings} />
                   </div>
                 </CardContent>
               )}
