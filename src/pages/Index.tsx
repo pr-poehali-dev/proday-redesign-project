@@ -12,7 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 import MapView from '@/components/MapView';
 import VideoTutorial from '@/components/VideoTutorial';
-import AdSlider from '@/components/AdSlider';
 import Footer from '@/components/Footer';
 import VIPSection from '@/components/VIPSection';
 
@@ -402,10 +401,6 @@ const Index = () => {
                 </CardContent>
               )}
             </Card>
-          </section>
-
-          <section className="mb-8">
-            <AdSlider />
           </section>
 
           <VIPSection />
